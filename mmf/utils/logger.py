@@ -22,7 +22,7 @@ class Logger:
         self.config = config
         self.save_dir = get_mmf_env(key="save_dir")
         self.log_format = config.training.log_format
-        self.time_format = "%Y-%m-%dT%H:%M:%S"
+        self.time_format = "%Y_%m_%dT%H_%M_%S"
         self.log_filename = "train_"
         self.log_filename += self.timer.get_time_hhmmss(None, format=self.time_format)
         self.log_filename += ".log"
@@ -70,17 +70,19 @@ class Logger:
         )
 
         # Add handler to file
-        channel = logging.FileHandler(filename=self.log_filename, mode="a")
-        channel.setFormatter(formatter)
-        self.add_handlers(channel)
+        self.log_file_channel = logging.FileHandler(
+            filename=self.log_filename, mode="a"
+        )
+        self.log_file_channel.setFormatter(formatter)
+        self.add_handlers(self.log_file_channel)
 
         # Add handler to train.log. train.log is full log that is also used
         # by slurm/fbl output
-        channel = logging.FileHandler(
+        self.train_log_file_channel = logging.FileHandler(
             filename=os.path.join(self.save_dir, "train.log"), mode="a"
         )
-        channel.setFormatter(formatter)
-        self.add_handlers(channel)
+        self.train_log_file_channel.setFormatter(formatter)
+        self.add_handlers(self.train_log_file_channel)
 
         # Add handler to stdout. Only when we are not capturing stdout in
         # the logger
